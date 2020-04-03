@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Profile</h1>
+    <div class="row">
+        <div class="col-sm-4">
+            <img src="{{ user.avatar(128) }}">
+        </div>
+        <div class="col-sm-4">
+            <h1>{{ user.username }}</h1>
+            {% if user.last_seen %}
+            <p>Last seen on: {{ user.last_seen }}</p>
+            {% endif %}
+            <p>{{ user.followers.count() }} followers, {{ user.followed.count() }} following.</p>
+            {% if user != current_user and not current_user.is_following(user) %}
+            <p><a href="{{ url_for('follow', username=user.username) }}">Follow</a></p>
+            {% elif user != current_user %}
+            <p><a href="{{ url_for('unfollow', username=user.username) }}">Unfollow</a></p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
