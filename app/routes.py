@@ -29,23 +29,36 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/game/<game_id>')
+@app.route('/games')
+@login_required
+def games():
+    page = request.args.get('page', 1, type=int)
+    games = Game.query.filter((Game.north == current_user) |
+                              (Game.east == current_user) |
+                              (Game.south == current_user) |
+                              (Game.west == current_user)).paginate(page,
+                                                                    10,
+                                                                    False)
+    return render_template('games.html', games=games.items)
+
+
+@app.route('/games/<game_id>')
 @login_required
 def game(game_id):
     game = Game.query.filter_by(id=game_id).first_or_404()
     if game.has_user(current_user):
-        return render_template('live.html', game=game_id)
+        return render_template('game.html', game=game_id)
     abort(403)
 
 
-@app.route('/user/<username>')
+@app.route('/users/<username>')
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     return render_template('user.html', user=user)
 
 
-@app.route('/follow/<username>')
+@app.route('/users/<username>/follow')
 @login_required
 def follow(username):
     user = User.query.filter_by(username=username).first()
@@ -61,7 +74,7 @@ def follow(username):
     return redirect(url_for('user', username=username))
 
 
-@app.route('/unfollow/<username>')
+@app.route('/users/<username>/unfollow')
 @login_required
 def unfollow(username):
     user = User.query.filter_by(username=username).first()
