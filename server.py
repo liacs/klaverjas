@@ -1,6 +1,7 @@
 import argparse
 
 from app import app, db, socketio
+from app.models import Game, User
 
 
 if __name__ == '__main__':
@@ -14,6 +15,20 @@ if __name__ == '__main__':
         db.drop_all()
         app.logger.warning('create database')
         db.create_all()
+
+        users = [User('north', 'north@kj.nl'),
+                 User('east', 'east@kj.nl'),
+                 User('south', 'south@kj.nl'),
+                 User('west', 'west@kj.nl')]
+        for user in users:
+            user.set_password('test')
+            db.session.add(user)
+        db.session.commit()
+
+        game = Game(users[0], users[1], users[2], users[3])
+        db.session.add(game)
+        db.session.commit()
+
         app.logger.info('App exit')
         exit()
 
