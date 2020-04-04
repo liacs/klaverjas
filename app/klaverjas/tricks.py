@@ -1,5 +1,5 @@
-from cards import Card, Rank
-from meld import meld_points
+from .cards import Card, Rank
+from .meld import meld_points
 
 
 class Trick:

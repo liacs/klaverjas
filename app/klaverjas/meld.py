@@ -1,4 +1,4 @@
-from cards import Card, Rank, Suit
+from .cards import Card, Rank, Suit
 
 
 meld_20 = []

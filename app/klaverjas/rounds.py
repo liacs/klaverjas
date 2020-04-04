@@ -1,4 +1,4 @@
-from tricks import Trick
+from .tricks import Trick
 
 
 def team(player):
