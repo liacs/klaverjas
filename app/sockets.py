@@ -2,13 +2,12 @@ import functools
 
 from flask import request
 from flask_login import current_user
-from flask_socketio import emit, join_room
 
 from app import app, socketio
+from app.models import Game
 
 
-users = {}
-sids = {}
+games = {}
 
 
 def authenticated_only(f):
@@ -25,26 +24,34 @@ def authenticated_only(f):
 @authenticated_only
 def connect():
     app.logger.info('connect {} {}'.format(request.sid, current_user.username))
-    if current_user.username not in users:
-        users[current_user.username] = []
-    users[current_user.username].append(request.sid)
-    sids[request.sid] = current_user.username
 
 
 @socketio.on('disconnect')
 def disconnect():
     app.logger.info('disconnect {}'.format(request.sid))
-    users[sids[request.sid]].remove(request.sid)
-    if len(users[sids[request.sid]]) == 0:
-        del users[sids[request.sid]]
-    del sids[request.sid]
 
 
 @socketio.on('join')
 @authenticated_only
 def join(data):
-    room = data['room']
+    game_id = data.get('game')
+    game = games.get(game_id)
+    if game is None:
+        game = Game.query.filter_by(id=game_id).first()
+        game.init()
+        games[game.id] = game
+
     app.logger.info('join {} {} {}'.format(request.sid, current_user.username,
-                                           room))
-    join_room(room)
-    emit('log', current_user.username + ' has entered the room.', room=room)
+                                           game.id))
+    game.event_join(current_user, request.sid)
+
+
+@socketio.on('bid')
+@authenticated_only
+def bid(data):
+    game_id = data.get('game')
+    game = games.get(game_id)
+
+    app.logger.info('bid {} {} {}'.format(request.sid, current_user.username,
+                                          game.id))
+    game.event_bid(current_user, data.get('trump_suit'))
