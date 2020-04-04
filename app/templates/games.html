@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table>
+    {% for game in games %}
+        {% include '_game.html' %}
+    {% endfor %}
+    </table>
+{% endblock %}
