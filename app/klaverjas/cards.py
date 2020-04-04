@@ -8,14 +8,11 @@ class Suit(Enum):
     CLUBS = 2
     DIAMONDS = 3
 
-    def color(self):
-        return self.value % 2
-
     def __lt__(self, other):
         return self.value < other.value
 
     def __str__(self):
-        return 'SHCD'[self.value]
+        return ['spades', 'hearts', 'clubs', 'diamonds'][self.value]
 
 
 @unique
@@ -33,7 +30,7 @@ class Rank(Enum):
         return self.value < other.value
 
     def __str__(self):
-        return ['7 ', '8 ', '9 ', '10', 'J ', 'Q ', 'K ', 'A '][self.value]
+        return ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'][self.value]
 
 
 class Card:
@@ -59,13 +56,6 @@ class Card:
     def __repr__(self):
         return '{}{}'.format(self._suit, self._rank)
 
-    def __str__(self):
-        black = '\x1b[90m'
-        red = '\x1b[31m'
-        reset = '\x1b[0m'
-        return '{}{}{}{}'.format([black, red][self._suit.color()],
-                                 self._suit, self._rank, reset)
-
     def order(self, trump_suit):
         if self._suit == trump_suit:
             return [8, 9, 14, 12, 15, 10, 11, 13][self._rank.value]
@@ -81,3 +71,6 @@ class Card:
 
     def suit(self):
         return self._suit
+
+    def to_dict(self):
+        return {'rank': str(self._rank), 'suit': str(self._suit)}
