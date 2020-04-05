@@ -121,6 +121,8 @@ class Game(db.Model):
 
     def event_bid(self, user, trump_suit):
         if self.is_bidding_phase():
+            if user != self.next_bidder():
+                return
             if trump_suit:
                 self._bids = None
                 self._trump_suit = trump_suit
@@ -153,8 +155,13 @@ class Game(db.Model):
                  'trump_suit': str(self._trump_suit)}
         if self.is_bidding_phase():
             self.emit('log', state, user)
-            if user == self.next_bidder():
-                self.emit('ask_bid', state, user)
+            if self._bids < 4:
+                if user == self.next_bidder():
+                    self.emit('ask_bid', state, user)
+            else:
+                if user == self.next_bidder():
+                    state['trump_suit'] = [str(suit) for suit in Suit if suit != self._trump_suit]
+                    self.emit('force_bid', state, user)
         else:
             pass
 
@@ -162,7 +169,8 @@ class Game(db.Model):
         return self._bids is not None
 
     def next_bidder(self):
-        return self._players[(self.player_idx(self.dealer()) + self._bids + 1) % 4]
+        return self._players[(self.player_idx(self.dealer()) +
+                              self._bids + 1) % 4]
 
     def player_idx(self, user):
         return self._players.index(user)

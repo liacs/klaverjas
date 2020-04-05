@@ -6,7 +6,24 @@
     <script src="{{ url_for('static', filename='scripts/main.js') }}" type="module"></script>
 {% endblock %}
 
+{% block styles %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='styles/base.css') }}" rel="stylesheet" />
+{% endblock %}
+
+
 {% block app_content %}
+    <div id="ask_bid">
+        <div>
+            <span>Play with </span><span id="trump_suit"></span>
+        </div>
+        <button id="play">play</button>
+        <button id="pass">pass</button>
+    </div>
+    <div id="force_bid">
+    </div>
+    <div id="hand">
+    </div>
     <script type="text/javascript">
         var game = "{{ game }}";
     </script>

@@ -1,0 +1,85 @@
+#ask_bid {
+    visibility: hidden;
+}
+
+#trump_suit {
+    font-size: 2em;
+}
+
+#force_bid {
+    visibility: hidden;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    position: relative;
+    float: left;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    font: 1.4em serif;
+    width: 75px;
+    height: 112px;
+    cursor: default;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.card.movable {
+    box-shadow: 0 0 20px 5px lightblue;
+}
+
+.card.movable:hover {
+    box-shadow: 0 0 20px 5px magenta;
+}
+
+.suit-clubs, .suit-spades {
+    color: black;
+}
+
+.suit-diamonds, .suit-hearts {
+    color: red;
+}
+
+.suit-clubs:after {
+    content: "♣";
+}
+
+.suit-diamonds:after {
+    content: "♦";
+}
+
+.suit-hearts:after {
+    content: "♦";
+}
+
+.suit-spades:after {
+    content: "♠";
+}
+
+div[class*='suit']:after {
+    position: absolute;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    font-size: 48px;
+    left: 20px;
+    top: 50px;
+}
+
+.card .rank,
+.card .suit {
+    display: block;
+    text-align: center;
+    width: 1.4em;
+}
+
+.card .rank {
+    margin-top: 5px;
+}
+
+.card .suit {
+    line-height: 0.8em;
+}
