@@ -11,16 +11,16 @@
     <link href="{{ url_for('static', filename='styles/base.css') }}" rel="stylesheet" />
 {% endblock %}
 
-
 {% block app_content %}
     <div id="ask_bid">
         <div>
-            <span>Play with </span><span id="trump_suit"></span>
+            <p>Play with <span id="trump" class="trump_suit"></span>?</p>
         </div>
         <button id="play">play</button>
         <button id="pass">pass</button>
     </div>
     <div id="force_bid">
+        <span>Choose trump: </span>
     </div>
     <div id="hand">
     </div>

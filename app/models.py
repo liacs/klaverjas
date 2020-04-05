@@ -126,44 +126,36 @@ class Game(db.Model):
             if trump_suit:
                 self._bids = None
                 self._trump_suit = trump_suit
-                # playing phase
+                round = Round(self.player_idx(user), self.player_idx(self.eldest()), trump_suit)
+                self._rounds.append(round)
+                player = self.next_player()
+                player_idx = self.player_idx(player)
+                moves = round.legal_moves(self._hands[player_idx])
+                self.emit('play', {'legal_moves': [card.to_dict() for card in moves]}, self.next_player())
             else:
                 self._bids += 1
                 if self._bids < 4:
-                    idx = self.player_idx(self.next_bidder())
-                    state = {'bids': self._bids,
-                             'dealer': str(self.dealer()),
-                             'hand': [card.to_dict() for card in self._hands[idx]],
-                             'trump_suit': str(self._trump_suit)}
-                    self.emit('ask_bid', state, self.next_bidder())
+                    self.emit('ask_bid', {'trump_suit': str(self._trump_suit)}, self.next_bidder())
                 else:
-                    idx = self.player_idx(self.eldest())
-                    state = {'bids': self._bids,
-                             'dealer': str(self.dealer()),
-                             'hand': [card.to_dict() for card in self._hands[idx]],
-                             'trump_suit': [str(suit) for suit in Suit if suit != self._trump_suit]}
-                    self.emit('force_bid', state, self.eldest())
+                    self.emit('force_bid', {'trump_suit': [str(suit) for suit in Suit if suit != self._trump_suit]}, self.eldest())
 
     def event_join(self, user, sid):
         self._sids[user.username] = sid
         join_room(self.id)
 
-        idx = self.player_idx(user)
-        state = {'bids': self._bids,
-                 'dealer': str(self.dealer()),
-                 'hand': [card.to_dict() for card in self._hands[idx]],
-                 'trump_suit': str(self._trump_suit)}
+        self.emit('log', self.state_for(user), user)
         if self.is_bidding_phase():
-            self.emit('log', state, user)
             if self._bids < 4:
                 if user == self.next_bidder():
-                    self.emit('ask_bid', state, user)
+                    self.emit('ask_bid', {'trump_suit': str(self._trump_suit)}, user)
             else:
                 if user == self.next_bidder():
-                    state['trump_suit'] = [str(suit) for suit in Suit if suit != self._trump_suit]
-                    self.emit('force_bid', state, user)
+                    self.emit('force_bid', {'trump_suit': [str(suit) for suit in Suit if suit != self._trump_suit]}, user)
         else:
-            pass
+            if user == self.next_player():
+                player_idx = self.player_idx(user)
+                moves = self._rounds[-1].legal_moves(self._hands[player_idx])
+                self.emit('play', {'legal_moves': [card.to_dict() for card in moves]}, user)
 
     def is_bidding_phase(self):
         return self._bids is not None
@@ -172,5 +164,25 @@ class Game(db.Model):
         return self._players[(self.player_idx(self.dealer()) +
                               self._bids + 1) % 4]
 
+    def next_player(self):
+        return self._players[self._rounds[-1].to_play()]
+
     def player_idx(self, user):
         return self._players.index(user)
+
+    def state_for(self, user):
+        idx = self.player_idx(user)
+        state = {'dealer': str(self.dealer()),
+                 'hand': [card.to_dict() for card in self._hands[idx]],
+                 'trump_suit': str(self._trump_suit),
+                 'north': str(self._players[(idx + 2) % 4]),
+                 'east': str(self._players[(idx + 3) % 4]),
+                 'west': str(self._players[(idx + 1) % 4])}
+        if self.is_bidding_phase():
+            state['bids'] = self._bids
+            state['to_play'] = str(self.next_bidder())
+        else:
+            tricks = self._rounds[-1].tricks()
+            trick = tricks[-1]
+            state['trick'] = [card.to_dict() for card in trick.cards()]
+        return state

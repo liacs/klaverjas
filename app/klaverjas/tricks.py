@@ -13,6 +13,9 @@ class Trick:
     def add(self, card):
         self._cards.append(card)
 
+    def cards(self):
+        return self._cards
+
     def highest_trump(self, trump_suit):
         return max(self._cards,
                    default=Card(trump_suit, Rank.SEVEN).order(trump_suit),

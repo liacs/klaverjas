@@ -2,12 +2,12 @@
     visibility: hidden;
 }
 
-#trump_suit {
-    font-size: 2em;
-}
-
 #force_bid {
     visibility: hidden;
+}
+
+.trump_suit {
+    font-size: 2em;
 }
 
 .card {
@@ -27,6 +27,7 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    transition: transform 0.2s;
 }
 
 .card.movable {
@@ -35,6 +36,10 @@
 
 .card.movable:hover {
     box-shadow: 0 0 20px 5px magenta;
+}
+
+.card.selected {
+    transform: translateY(-20px);
 }
 
 .suit-clubs, .suit-spades {
@@ -54,7 +59,7 @@
 }
 
 .suit-hearts:after {
-    content: "♦";
+    content: "♥";
 }
 
 .suit-spades:after {

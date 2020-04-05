@@ -28,7 +28,7 @@ socket.on("ask_bid", function(data) {
     let div = document.getElementById("ask_bid");
     document.getElementById("play").addEventListener("click", function _play() {
         console.log("play");
-        socket.emit("bid", {"game": game, "trump_suit": data["trump_suit"]});
+        socket.emit("bid", {"game": game, "trump_suit": data.trump_suit});
         this.removeEventListener("click", _play);
         div.style.visibility = "hidden";
     });
@@ -38,7 +38,7 @@ socket.on("ask_bid", function(data) {
         this.removeEventListener("click", _pass);
         div.style.visibility = "hidden";
     });
-    document.getElementById("trump_suit").innerHTML = suit_HTML(data.trump_suit);
+    document.getElementById("trump").classList.add("suit-" + data.trump_suit);
     div.style.visibility = "visible";
 });
 
@@ -46,17 +46,29 @@ socket.on("force_bid", function(data) {
     console.log("force_bid", data);
     let div = document.getElementById("force_bid");
     for (let i = 0; i < data.trump_suit.length; i++) {
-        let but = document.createElement("button");
-        but.innerHTML = data.trump_suit[i];
-        but.addEventListener("click", function(suit) {
+        let span = document.createElement("span");
+        span.className = "trump_suit";
+        span.classList.add("suit-" + data.trump_suit[i]);
+        span.addEventListener("click", function(suit) {
             console.log(data.trump_suit[i]);
             socket.emit("bid", {"game": game, "trump_suit": data.trump_suit[i]})
             div.innerHTML = "";
             div.style.visibility = "hidden";
         });
-        div.appendChild(but);
+        div.appendChild(span);
     }
     div.style.visibility = "visible";
+});
+
+socket.on("play", function(data) {
+    console.log("play", data);
+    for (let i = 0; i < data.legal_moves.length; i++) {
+        let card = document.getElementById(data.legal_moves[i].suit + data.legal_moves[i].rank);
+        card.classList.add("movable");
+        card.addEventListener("click", function() {
+            card.classList.toggle("selected");
+        });
+    }
 });
 
 function suit_HTML(suit) {
@@ -66,6 +78,7 @@ function suit_HTML(suit) {
 
 function create_card(card) {
     let div = document.createElement("div");
+    div.id = card.suit + card.rank
     div.className = "card";
     div.classList.add("suit-" + card.suit);
     let rank = document.createElement("span");
