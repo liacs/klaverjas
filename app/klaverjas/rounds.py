@@ -18,6 +18,9 @@ class Round:
         self._points = [0, 0]
         self._meld = [0, 0]
 
+    def current_trick(self):
+        return self._tricks[-1]
+
     def is_complete(self):
         return len(self._tricks) == 8 and self._tricks[-1].is_complete()
 
@@ -91,9 +94,6 @@ class Round:
 
     def to_play(self):
         return self._tricks[-1].to_play()
-
-    def tricks(self):
-        return self._tricks
 
     def trump_suit(self):
         return self._trump_suit

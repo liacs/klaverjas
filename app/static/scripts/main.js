@@ -13,8 +13,8 @@ socket.on("disconnect", function() {
     console.log("disconnect");
 });
 
-socket.on("log", function(data) {
-    console.log("log", data);
+socket.on("notify", function(data) {
+    console.log("notify", data);
     let hand = document.getElementById("hand");
     hand.innerHTML = "";
     for (let i = 0; i < data.hand.length; i++) {

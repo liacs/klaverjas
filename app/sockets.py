@@ -2,6 +2,7 @@ import functools
 
 from flask import request
 from flask_login import current_user
+from sqlalchemy.exc import SQLAlchemyError
 
 from app import app, socketio
 from app.models import Game
@@ -37,12 +38,13 @@ def join(data):
     game_id = data.get('game')
     game = games.get(game_id)
     if game is None:
-        game = Game.query.filter_by(id=game_id).first()
+        try:
+            game = Game.query.filter_by(id=game_id).first()
+        except SQLAlchemyError as exp:
+            app.logger.error(exp)
+            return
         game.init()
         games[game.id] = game
-
-    app.logger.info('join {} {} {}'.format(request.sid, current_user.username,
-                                           game.id))
     game.event_join(current_user, request.sid)
 
 
@@ -51,7 +53,16 @@ def join(data):
 def bid(data):
     game_id = data.get('game')
     game = games.get(game_id)
+    if game is None:
+        app.logger.error('unknown game {}'.format(game_id))
+    game.event_bid(current_user, data)
 
-    app.logger.info('bid {} {} {}'.format(request.sid, current_user.username,
-                                          game.id))
-    game.event_bid(current_user, data.get('trump_suit'))
+
+@socketio.on('play')
+@authenticated_only
+def play(data):
+    game_id = data.get('game')
+    game = games.get(game_id)
+    if game is None:
+        app.logger.error('unknown game {}'.format(game_id))
+    game.event_play(current_user, data)
