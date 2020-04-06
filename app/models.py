@@ -8,7 +8,8 @@ from flask_socketio import emit
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login
-from app.klaverjas.cards import Card, Rank, Suit
+from app.klaverjas.cards import (Card, Rank, Suit, card_from_dict,
+                                 suit_from_label)
 from app.klaverjas.rounds import Round
 
 
@@ -109,19 +110,25 @@ class Game(db.Model):
         self._bids = 0
 
     def dealer(self):
-        return self._players[(self.round_nr() - 1) % 4]
+        if self._bids is not None:
+            return self._players[len(self._rounds) % 4]
+        return self._players[(len(self._rounds) - 1) % 4]
 
     def event_bid(self, player, data):
+        if self._bids is None:
+            return
         try:
             lead = self._players.index(player)
         except ValueError:
             return
+        if player != self.to_play():
+            return
         trump_suit = data.get('trump_suit')
         if trump_suit is not None:
-            self._bids = None
-            self._trump_suit = trump_suit
             eldest = (self._players.index(self.dealer()) + 1) % 4
-            self._rounds.append(Round(lead, eldest, trump_suit))
+            self._bids = None
+            self._trump_suit = suit_from_label(trump_suit)
+            self._rounds.append(Round(lead, eldest, self._trump_suit))
         else:
             self._bids += 1
         self.notify_all()
@@ -135,28 +142,52 @@ class Game(db.Model):
         self.notify(player)
 
     def event_play(self, player, data):
-        pass
+        if self._bids is not None:
+            return
+        try:
+            idx = self._players.index(player)
+        except ValueError:
+            return
+        if player != self.to_play():
+            return
+        card = card_from_dict(data['card'])
+        round = self._rounds[-1]
+        moves = round.legal_moves(self._hands[idx])
+        if card not in moves:
+            return
+        self._hands[idx].remove(card)
+        round.play_card(card)
+        self.notify_all()
+        round.complete_trick()
+        if round.is_complete():
+            self._scores[0] += round.points()[0] + round.meld()[0]
+            self._scores[1] += round.points()[1] + round.meld()[1]
+            if len(self._rounds) < 16:
+                self.deal()
+            self.notify_all()
 
     def notify(self, player):
         idx = self._players.index(player)
-        trick = []
-        try:
-            round = self._rounds[-1]
-            current_trick = round.current_trick()
-            if current_trick is not None:
-                trick = [card.to_dict() for card in current_trick.cards()]
-        except IndexError:
-            pass
+        trick = {}
+        if self._bids is None:
+            try:
+                round = self._rounds[-1]
+                current_trick = round.current_trick()
+                if current_trick is not None:
+                    cards = [card.to_dict() for card in current_trick.cards()]
+                    lead = self._players[current_trick.lead()]
+                    trick = {'cards': cards, 'lead': str(lead)}
+            except IndexError:
+                pass
         state = {'north': str(self._players[(idx + 2) % 4]),
                  'east': str(self._players[(idx + 3) % 4]),
                  'west': str(self._players[(idx + 1) % 4]),
                  'dealer': str(self.dealer()),
-                 'round': self.round_nr(),
+                 'round': len(self._rounds),
                  'scores': self._scores,
                  'trick': trick,
                  'hand': [card.to_dict() for card in self._hands[idx]],
-                 'trump_suit': str(self._trump_suit),
-                 'bids': self._bids}
+                 'trump_suit': str(self._trump_suit)}
         sid = self._sids[idx]
         if sid is not None:
             emit('notify', state, room=sid)
@@ -176,9 +207,6 @@ class Game(db.Model):
     def notify_all(self):
         for player in self._players:
             self.notify(player)
-
-    def round_nr(self):
-        return max(len(self._rounds), 1)
 
     def to_play(self):
         if self._bids is not None:

@@ -74,3 +74,15 @@ class Card:
 
     def to_dict(self):
         return {'rank': str(self._rank), 'suit': str(self._suit)}
+
+
+def card_from_dict(dict):
+    return Card(suit_from_label(dict['suit']), rank_from_label(dict['rank']))
+
+
+def suit_from_label(label):
+    return Suit(['spades', 'hearts', 'clubs', 'diamonds'].index(label))
+
+
+def rank_from_label(label):
+    return Rank(['7', '8', '9', '10', 'J', 'Q', 'K', 'A'].index(label))

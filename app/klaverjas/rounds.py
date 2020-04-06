@@ -18,6 +18,32 @@ class Round:
         self._points = [0, 0]
         self._meld = [0, 0]
 
+    def complete_trick(self):
+        trick = self._tricks[-1]
+        if trick.is_complete():
+            winner = trick.winner(self._trump_suit)
+            points = trick.points(self._trump_suit)
+            meld = trick.meld(self._trump_suit)
+
+            self._points[team(winner)] += points
+            self._meld[team(winner)] += meld
+
+            if len(self._tricks) == 8:
+                self._points[team(winner)] += 10
+                us = team(self._lead)
+                them = other_team(self._lead)
+
+                if (self._points[us] + self._meld[us] <=
+                        self._points[them] + self._meld[them]):
+                    self._points[them] = 162
+                    self._meld[them] += self._meld[us]
+                    self._points[us] = 0
+                    self._meld[us] = 0
+                elif self.is_pit():
+                    self._meld[us] += 100
+            else:
+                self._tricks.append(Trick(winner))
+
     def current_trick(self):
         return self._tricks[-1]
 
@@ -64,30 +90,6 @@ class Round:
         trick = self._tricks[-1]
 
         trick.add(card)
-
-        if trick.is_complete():
-            winner = trick.winner(self._trump_suit)
-            points = trick.points(self._trump_suit)
-            meld = trick.meld(self._trump_suit)
-
-            self._points[team(winner)] += points
-            self._meld[team(winner)] += meld
-
-            if len(self._tricks) == 8:
-                self._points[team(winner)] += 10
-                us = team(self._lead)
-                them = other_team(self._lead)
-
-                if (self._points[us] + self._meld[us] <=
-                        self._points[them] + self._meld[them]):
-                    self._points[them] = 162
-                    self._meld[them] += self._meld[us]
-                    self._points[us] = 0
-                    self._meld[us] = 0
-                elif self.is_pit():
-                    self._meld[us] += 100
-            else:
-                self._tricks.append(Trick(winner))
 
     def points(self):
         return self._points

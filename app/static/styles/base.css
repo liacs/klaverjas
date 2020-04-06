@@ -6,6 +6,16 @@
     visibility: hidden;
 }
 
+#trick {
+    clear: left;
+    float: left;
+}
+
+#hand {
+    clear: left;
+    float: left;
+}
+
 .trump_suit {
     font-size: 2em;
 }

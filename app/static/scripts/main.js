@@ -15,6 +15,14 @@ socket.on("disconnect", function() {
 
 socket.on("notify", function(data) {
     console.log("notify", data);
+    trick.innerHTML = "";
+    if (data.trick.cards) {
+        let trick = document.getElementById("trick");
+        for (let i = 0; i < data.trick.cards.length; i++) {
+            let card = create_card(data.trick.cards[i]);
+            trick.appendChild(card);
+        }
+    }
     let hand = document.getElementById("hand");
     hand.innerHTML = "";
     for (let i = 0; i < data.hand.length; i++) {
@@ -66,7 +74,9 @@ socket.on("play", function(data) {
         let card = document.getElementById(data.legal_moves[i].suit + data.legal_moves[i].rank);
         card.classList.add("movable");
         card.addEventListener("click", function() {
-            card.classList.toggle("selected");
+            console.log("play");
+            socket.emit("play", {"game": game, "card": {"suit": data.legal_moves[i].suit,
+                                                        "rank": data.legal_moves[i].rank}});
         });
     }
 });
