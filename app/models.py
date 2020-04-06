@@ -158,12 +158,12 @@ class Game(db.Model):
         self._hands[idx].remove(card)
         round.play_card(card)
         self.notify_all()
-        round.complete_trick()
-        if round.is_complete():
-            self._scores[0] += round.points()[0] + round.meld()[0]
-            self._scores[1] += round.points()[1] + round.meld()[1]
-            if len(self._rounds) < 16:
-                self.deal()
+        if round.complete_trick():
+            if round.is_complete():
+                self._scores[0] += round.points()[0] + round.meld()[0]
+                self._scores[1] += round.points()[1] + round.meld()[1]
+                if len(self._rounds) < 16:
+                    self.deal()
             self.notify_all()
 
     def notify(self, player):

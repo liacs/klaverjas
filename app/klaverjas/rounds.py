@@ -43,6 +43,8 @@ class Round:
                     self._meld[us] += 100
             else:
                 self._tricks.append(Trick(winner))
+            return True
+        return False
 
     def current_trick(self):
         return self._tricks[-1]
