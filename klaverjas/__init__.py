@@ -25,7 +25,7 @@ socketio = SocketIO(app)
 db = SQLAlchemy(app)
 
 
-from app import errors, models, routes, sockets
+from klaverjas import errors, models, routes, sockets
 
 
 if not app.debug:

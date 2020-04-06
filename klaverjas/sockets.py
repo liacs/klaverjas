@@ -4,8 +4,8 @@ from flask import request
 from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 
-from app import app, socketio
-from app.models import Game
+from klaverjas import app, socketio
+from klaverjas.models import Game
 
 
 games = {}

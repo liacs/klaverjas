@@ -7,10 +7,10 @@ from flask_login import UserMixin
 from flask_socketio import emit
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db, login
-from app.klaverjas.cards import (Card, Rank, Suit, card_from_dict,
-                                 suit_from_label)
-from app.klaverjas.rounds import Round
+from klaverjas import db, login
+from klaverjas.game.cards import (Card, Rank, Suit, card_from_dict,
+                                  suit_from_label)
+from klaverjas.game.rounds import Round
 
 
 followers = db.Table('followers',

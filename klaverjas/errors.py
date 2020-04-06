@@ -1,5 +1,5 @@
 from flask import render_template, request
-from app import app, db
+from klaverjas import app, db
 
 
 @app.errorhandler(403)

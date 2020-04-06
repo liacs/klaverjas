@@ -1,7 +1,7 @@
 import argparse
 
-from app import app, db, socketio
-from app.models import Game, User
+from klaverjas import app, db, socketio
+from klaverjas.models import Game, User
 
 
 if __name__ == '__main__':

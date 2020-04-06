@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import (Email, EqualTo, DataRequired,
                                 ValidationError)
 
-from app.models import User
+from klaverjas.models import User
 
 
 class LoginForm(FlaskForm):

@@ -6,9 +6,9 @@ from flask_login import (current_user, login_required, login_user,
                          logout_user)
 from werkzeug.urls import url_parse
 
-from app import app, db
-from app.forms import LoginForm, RegistrationForm
-from app.models import Game, User
+from klaverjas import app, db
+from klaverjas.forms import LoginForm, RegistrationForm
+from klaverjas.models import Game, User
 
 
 @app.before_request
