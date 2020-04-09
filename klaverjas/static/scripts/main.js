@@ -15,43 +15,45 @@ socket.on("disconnect", function() {
 
 socket.on("notify", function(data) {
     console.log("notify", data);
-    trick.innerHTML = "";
-    if (data.trick.cards) {
-        let trick = document.getElementById("trick");
-        for (let i = 0; i < data.trick.cards.length; i++) {
-            let card = create_card(data.trick.cards[i]);
-            trick.appendChild(card);
-        }
-    }
-    let hand = document.getElementById("hand");
-    hand.innerHTML = "";
+    let table = document.getElementById("table");
+    table.innerHTML = "";
     for (let i = 0; i < data.hand.length; i++) {
-        let card = create_card(data.hand[i]);
-        hand.appendChild(card);
+        let card = create_card(data.hand[i], "hand-" + (i + 1), "hand-" + (i + 1));
+        table.appendChild(card);
     }
 });
 
 socket.on("ask_bid", function(data) {
     console.log("ask_bid", data);
-    let div = document.getElementById("ask_bid");
-    document.getElementById("play").addEventListener("click", function _play() {
+    document.getElementById("trump-suit-chosen").className = "trump-suit suit-" + data.trump_suit;
+    document.getElementById("play").addEventListener("click", function() {
         console.log("play");
+        $("#ask-bid").modal("hide");
         socket.emit("bid", {"game": game, "trump_suit": data.trump_suit});
-        this.removeEventListener("click", _play);
-        div.style.visibility = "hidden";
     });
-    document.getElementById("pass").addEventListener("click", function _pass() {
+    document.getElementById("pass").addEventListener("click", function() {
         console.log("pass");
+        $("#ask-bid").modal("hide");
         socket.emit("bid", {"game": game});
-        this.removeEventListener("click", _pass);
-        div.style.visibility = "hidden";
     });
-    document.getElementById("trump").classList.add("suit-" + data.trump_suit);
-    div.style.visibility = "visible";
+    $("#ask-bid").modal("show");
 });
 
 socket.on("force_bid", function(data) {
     console.log("force_bid", data);
+    let options = document.getElementById("force-bid-options");
+    for (let i = 0; i < data.trump_suit.length; i++) {
+        let el = document.createElement("button");
+        el.className = "trump-suit suit-" + data.trump_suit[i]
+        el.addEventListener("click", function() {
+            console.log("play", data.trump_suit[i]);
+            $("#ask-bid").modal("hide");
+            socket.emit("bid", {"game": game, "trump_suit": data.trump_suit[i]})
+        });
+        options.appendChild(el);
+    }
+    $("#force-bid").modal("show");
+    /*
     let div = document.getElementById("force_bid");
     for (let i = 0; i < data.trump_suit.length; i++) {
         let span = document.createElement("span");
@@ -66,12 +68,13 @@ socket.on("force_bid", function(data) {
         div.appendChild(span);
     }
     div.style.visibility = "visible";
+    */
 });
 
 socket.on("play", function(data) {
     console.log("play", data);
     for (let i = 0; i < data.legal_moves.length; i++) {
-        let card = document.getElementById(data.legal_moves[i].suit + data.legal_moves[i].rank);
+        let card = document.getElementById("hand-" + (i + 1));
         card.classList.add("movable");
         card.addEventListener("click", function() {
             console.log("play");
@@ -86,18 +89,26 @@ function suit_HTML(suit) {
             "hearts": "&hearts;", "spades": "&spades;"}[suit];
 }
 
-function create_card(card) {
+function create_card(card, id, classes) {
     let div = document.createElement("div");
-    div.id = card.suit + card.rank
+    if (id) {
+        div.id = id;
+    }
     div.className = "card";
-    div.classList.add("suit-" + card.suit);
+    if (classes) {
+        div.classList.add(classes);
+    }
+    let face = document.createElement("div");
+    face.className = "face"
+    face.classList.add("suit-" + card.suit);
     let rank = document.createElement("span");
     rank.className = "rank";
     rank.innerHTML = card.rank;
     let suit = document.createElement("span");
     suit.className = "suit";
     suit.innerHTML = suit_HTML(card.suit);
-    div.appendChild(rank);
-    div.appendChild(suit);
+    face.appendChild(rank);
+    face.appendChild(suit);
+    div.appendChild(face);
     return div;
 }

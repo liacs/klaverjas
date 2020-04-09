@@ -21,7 +21,7 @@
                 {% if not current_user.is_anonymous %}
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="{{ url_for('user', username=current_user.username) }}">
-                        <img src="{{ current_user.avatar(20) }}"/>
+                        <img class="img-rounded" src="{{ current_user.avatar(20) }}"/>
                     </a></li>
                 </ul>
                 {% endif %}

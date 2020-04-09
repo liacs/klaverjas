@@ -1,59 +1,13 @@
-#trick {
-    clear: left;
-    float: left;
-}
-
-#hand {
-    clear: left;
-    float: left;
-}
-
-#ruler {
-    background: white;
-    display: block;
-    position: relative;
-}
-
-#table {
-    background-image: radial-gradient(ellipse, #00a651, darkgreen);
-    border-radius: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    display: block;
-    position: relative;
-    margin-right: 2em;
-    height: 480px;
-    width: 640px;
-    float: left;
-}
-
-#side {
-    background: magenta;
-    margin-right: auto;
-    width: 240px;
-    float: left;
-}
-
-#trump-suit-chosen,
-#trump-suit-1,
-#trump-suit-2,
-#trump-suit-3,
-#trump-suit-4 {
-    width: 1.4em;
-}
-
-.trump-suit {
-    font-size: 2em;
-}
-
 .card {
-    background: white;
     border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+
     position: absolute;
-    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    font: 1.4em serif;
     width: 75px;
     height: 112px;
+
+    font: 1.4em serif;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+
     cursor: default;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -61,15 +15,50 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    transition: transform 0.2s;
+
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+}
+
+.card .back,
+.card .face {
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.card .back {
+    background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
+    border: solid white 6px;
+
+    transform: rotateY(180deg);
+}
+
+.card .face {
+    background-color: white;
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
 }
 
 .card.movable {
-    box-shadow: 0 0 20px 5px lightblue;
+    box-shadow: 0 0 5px 5px lightblue;
+
+    cursor: pointer;
 }
 
 .card.movable:hover {
-    box-shadow: 0 0 20px 5px magenta;
+    box-shadow: 0 0 5px 5px magenta;
 }
 
 .card.selected {
@@ -100,19 +89,21 @@
     content: "♠";
 }
 
-div[class*='suit']:after {
+.card div[class*='suit']:after {
     position: absolute;
-    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    font-size: 48px;
     left: 20px;
     top: 50px;
+
+    font-size: 48px;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .card .rank,
 .card .suit {
     display: block;
-    text-align: center;
     width: 1.4em;
+
+    text-align: center;
 }
 
 .card .rank {
@@ -121,4 +112,241 @@ div[class*='suit']:after {
 
 .card .suit {
     line-height: 0.8em;
+}
+
+.hand {
+    position: absolute;
+    width: 215px;
+    height: 124px;
+
+    transform-origin: left top;
+}
+
+.hand .card {
+    background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
+    border: solid white 6px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+.hand.east {
+    transform: rotate(270deg) translate(-388.75px, 551px);
+}
+
+.hand.north {
+    transform: rotate(180deg) translate(-482.5px, -132px);
+}
+
+.hand.west {
+    transform: rotate(90deg) translate(173.75px, -199px);
+}
+
+.hand div:nth-child(1) {
+    transform: rotate(-2deg);
+    left: 60px;
+    top: 0px;
+    z-index: 3;
+}
+
+.hand div:nth-child(2) {
+    transform: rotate(2deg);
+    left: 80px;
+    top: 0px;
+    z-index: 4;
+}
+
+.hand div:nth-child(3) {
+    transform: rotate(-4deg);
+    left: 40px;
+    top: 3px;
+    z-index: 2;
+}
+
+.hand div:nth-child(4) {
+    transform: rotate(4deg);
+    left: 100px;
+    top: 3px;
+    z-index: 5;
+}
+
+.hand div:nth-child(5) {
+    transform: rotate(-8deg);
+    left: 20px;
+    top: 6px;
+    z-index: 1;
+}
+
+.hand div:nth-child(6) {
+    transform: rotate(8deg);
+    left: 120px;
+    top: 6px;
+    z-index: 6;
+}
+
+.hand div:nth-child(7) {
+    transform: rotate(-16deg);
+    left: 0px;
+    top: 12px;
+    z-index: 0;
+}
+
+.hand div:nth-child(8) {
+    transform: rotate(16deg);
+    left: 140px;
+    top: 12px;
+    z-index: 7;
+}
+
+.table {
+    background-image: radial-gradient(ellipse, #00a651, darkgreen);
+    border-radius: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+
+    width: 750px;
+    height: 562.5px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    perspective: 9999px;
+}
+
+.trick-west {
+    position: absolute;
+    transform: rotate(85deg) translate(263.75px, -320px);
+}
+
+.trick-north {
+    position: absolute;
+    transform: rotate(187deg) translate(-438.5px, -207px);
+}
+
+.trick-east {
+    position: absolute;
+    transform: rotate(265deg) translate(-358.75px, 380px);
+}
+
+.trick-south {
+    position: absolute;
+    transform: rotate(7deg) translate(372.5px, 250px);
+}
+
+.trump-suit {
+    width: 1.3em;
+    font-size: 2em;
+}
+
+.hand-1 {
+    transform: rotate(-2deg);
+    left: 330px;
+    top: 426px;
+    z-index: 3;
+}
+
+.hand-2 {
+    transform: rotate(2deg);
+    left: 355px;
+    top: 426px;
+    z-index: 4;
+}
+
+.hand-3 {
+    transform: rotate(-4deg);
+    left: 305px;
+    top: 429px;
+    z-index: 2;
+}
+
+.hand-4 {
+    transform: rotate(4deg);
+    left: 380px;
+    top: 429px;
+    z-index: 5;
+}
+
+.hand-5 {
+    transform: rotate(-8deg);
+    left: 280px;
+    top: 432px;
+    z-index: 1;
+}
+
+.hand-6 {
+    transform: rotate(8deg);
+    left: 405px;
+    top: 432px;
+    z-index: 6;
+}
+
+.hand-7 {
+    transform: rotate(-16deg);
+    left: 255px;
+    top: 438px;
+    z-index: 0;
+}
+
+.hand-8 {
+    transform: rotate(16deg);
+    left: 430px;
+    top: 438px;
+    z-index: 7;
+}
+
+.player {
+    border-radius: 10px;
+    border: solid #444444 8px;
+    box-sizing: border-box;
+    opacity: 0.9;
+
+    background: white;
+    padding: 2px;
+    position: absolute;
+    width: 110px;
+    height: 80px;
+    z-index: 8;
+}
+
+.player.east {
+    left: 635px;
+    top: 241.25px;
+}
+
+.player.north {
+    left: 320px;
+    top: 5px;
+}
+
+.player.south {
+    left: 320px;
+    top: 477.5px;
+}
+
+.player.west {
+    left: 5px;
+    top: 241.25px;
+}
+
+.player.active {
+    box-shadow: 0 0 5px 5px magenta;
+}
+
+.player .dealer {
+    border-radius: 50%;
+    border: solid #444444 1px;
+    position: absolute;
+    text-align: center;
+    left: 68px;
+    top: 40px;
+    height: 22px;
+    width: 22px;
+}
+
+.player .trump {
+    position: absolute;
+    text-align: center;
+    font-size: 3em;
+    width: 30px;
+    left: 64px;
+    top: -15px;
 }

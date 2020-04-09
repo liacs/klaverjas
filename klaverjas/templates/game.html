@@ -15,18 +15,37 @@
 {% endblock %}
 
 {% block app_content %}
-    <div id="ask_bid">
-        <div>
-            <p>Play with <span id="trump" class="trump_suit"></span>?</p>
-        </div>
-        <button id="play">play</button>
-        <button id="pass">pass</button>
+<div class="modal fade bd-example-modal-sm" id="ask-bid" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bidding</h5>
+      </div>
+      <div class="modal-body">
+        <p><button id="trump-suit-chosen" class="trump-suit" disabled></button>&nbsp;&nbsp;was chosen as trump suit.<p>
+        <p>Do you want to play?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="pass" type="button" class="btn btn-dark">Pass</button>
+        <button id="play" type="button" class="btn btn-dark">Play</button>
+      </div>
     </div>
-    <div id="force_bid">
-        <span>Choose trump: </span>
+  </div>
+</div>
+
+<div class="modal fade bd-example-modal-sm" id="force-bid" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bidding</h5>
+      </div>
+      <div class="modal-body" id="force-bid-options">
+        <p>Choose the trump suit:</p>
+      </div>
     </div>
-    <div id="trick">
-    </div>
-    <div id="hand">
-    </div>
+  </div>
+</div>
+
+<div class="table" id="table">
+</div>
 {% endblock %}
