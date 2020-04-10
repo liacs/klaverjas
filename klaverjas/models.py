@@ -62,6 +62,9 @@ class User(UserMixin, db.Model):
         return self.followed.filter(
             followers.c.followed_id == user.id).count() > 0
 
+    def to_dict(self):
+        return {'name': str(self), 'avatar': self.avatar(60)}
+
 
 @login.user_loader
 def load_user(id):
@@ -168,21 +171,29 @@ class Game(db.Model):
 
     def notify(self, player):
         idx = self._players.index(player)
-        trick = {}
+        lead = None
+        trick = []
         if self._bids is None:
             try:
                 round = self._rounds[-1]
+                lead = str(self._players[round.lead()])
                 current_trick = round.current_trick()
                 if current_trick is not None:
-                    cards = [card.to_dict() for card in current_trick.cards()]
-                    lead = self._players[current_trick.lead()]
-                    trick = {'cards': cards, 'lead': str(lead)}
+                    for jdx, card in enumerate(current_trick.cards()):
+                        play = (current_trick.lead() + jdx) % 4
+                        trick.append({'card': card.to_dict(),
+                                      'player': str(self._players[play])})
             except IndexError:
                 pass
-        state = {'north': str(self._players[(idx + 2) % 4]),
-                 'east': str(self._players[(idx + 3) % 4]),
-                 'west': str(self._players[(idx + 1) % 4]),
+        state = {'north': {**self._players[(idx + 2) % 4].to_dict(),
+                           'card_count': len(self._hands[(idx + 2) % 4])},
+                 'east':  {**self._players[(idx + 3) % 4].to_dict(),
+                           'card_count': len(self._hands[(idx + 3) % 4])},
+                 'west':  {**self._players[(idx + 1) % 4].to_dict(),
+                           'card_count': len(self._hands[(idx + 1) % 4])},
+                 'south': self._players[idx].to_dict(),
                  'dealer': str(self.dealer()),
+                 'lead': lead,
                  'round': len(self._rounds),
                  'scores': self._scores,
                  'trick': trick,

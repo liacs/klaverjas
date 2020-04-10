@@ -61,10 +61,6 @@
     box-shadow: 0 0 5px 5px magenta;
 }
 
-.card.selected {
-    transform: translateY(-20px);
-}
-
 .suit-clubs, .suit-spades {
     color: black;
 }
@@ -335,11 +331,16 @@
     border-radius: 50%;
     border: solid #444444 1px;
     position: absolute;
+    padding-left: 0.1em;
     text-align: center;
     left: 68px;
     top: 40px;
     height: 22px;
     width: 22px;
+}
+
+.player .dealer:after {
+    content: "D";
 }
 
 .player .trump {

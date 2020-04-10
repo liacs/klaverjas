@@ -16,9 +16,64 @@ socket.on("disconnect", function() {
 socket.on("notify", function(data) {
     console.log("notify", data);
     let table = document.getElementById("table");
-    table.innerHTML = "";
+
+    for (let i = 0; i < 8; i++) {
+        let elements = document.getElementsByClassName("hand-" + (i + 1));
+        while (elements.length > 0) {
+            elements[0].remove();
+        }
+    }
+
+    if (data.trick.length === 0)
+    {
+        document.getElementById("trick-west").innerHTML = "";
+        document.getElementById("trick-north").innerHTML = "";
+        document.getElementById("trick-east").innerHTML = "";
+        document.getElementById("trick-south").innerHTML = "";
+    }
+
+    for (let el of ["west", "north", "east", "south"]) {
+        let player = document.getElementById(el);
+        let avatar = document.createElement("img");
+        avatar.src = data[el].avatar;
+        avatar.className = "img-rounded";
+        player.innerHTML = "";
+        player.appendChild(avatar);
+        if (data[el].name === data.dealer) {
+            let dealer = document.createElement("div");
+            dealer.className = "dealer";
+            player.appendChild(dealer);
+        }
+
+        if (data[el].name === data.lead) {
+            let trump = document.createElement("div");
+            trump.className = "trump";
+            let trump_suit = document.createElement("div");
+            trump_suit.className = "suit-" + data.trump_suit;
+            trump.appendChild(trump_suit);
+            player.appendChild(trump);
+        }
+
+        if (el !== "south") {
+            let hand = document.getElementById("hand-" + el);
+            hand.innerHTML = "";
+            for (let i = 0; i < data[el].card_count; i++) {
+                let card = document.createElement("div");
+                card.className = "card";
+                hand.appendChild(card);
+            }
+        }
+
+        for (let card of data.trick) {
+            if (data[el].name === card.player) {
+                let div = create_card(card.card);
+                document.getElementById("trick-" + el).appendChild(div);
+            }
+        }
+    }
+
     for (let i = 0; i < data.hand.length; i++) {
-        let card = create_card(data.hand[i], "hand-" + (i + 1), "hand-" + (i + 1));
+        let card = create_card(data.hand[i], data.hand[i].suit + data.hand[i].rank, "hand-" + (i + 1));
         table.appendChild(card);
     }
 });
@@ -47,34 +102,18 @@ socket.on("force_bid", function(data) {
         el.className = "trump-suit suit-" + data.trump_suit[i]
         el.addEventListener("click", function() {
             console.log("play", data.trump_suit[i]);
-            $("#ask-bid").modal("hide");
+            $("#force-bid").modal("hide");
             socket.emit("bid", {"game": game, "trump_suit": data.trump_suit[i]})
         });
         options.appendChild(el);
     }
     $("#force-bid").modal("show");
-    /*
-    let div = document.getElementById("force_bid");
-    for (let i = 0; i < data.trump_suit.length; i++) {
-        let span = document.createElement("span");
-        span.className = "trump_suit";
-        span.classList.add("suit-" + data.trump_suit[i]);
-        span.addEventListener("click", function(suit) {
-            console.log(data.trump_suit[i]);
-            socket.emit("bid", {"game": game, "trump_suit": data.trump_suit[i]})
-            div.innerHTML = "";
-            div.style.visibility = "hidden";
-        });
-        div.appendChild(span);
-    }
-    div.style.visibility = "visible";
-    */
 });
 
 socket.on("play", function(data) {
     console.log("play", data);
     for (let i = 0; i < data.legal_moves.length; i++) {
-        let card = document.getElementById("hand-" + (i + 1));
+        let card = document.getElementById(data.legal_moves[i].suit + data.legal_moves[i].rank);
         card.classList.add("movable");
         card.addEventListener("click", function() {
             console.log("play");
