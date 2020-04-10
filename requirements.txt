@@ -1,1 +1,7 @@
+eventlet
+Flask-Bootstrap
+Flask-Login
+Flask-SocketIO
+Flask-SQLAlchemy
+Flask-WTF
 gunicorn==19.9.0
