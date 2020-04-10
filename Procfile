@@ -1,1 +1,1 @@
-web gunicorn --workers=1 klaverjas:app
+web gunicorn --workers=1 --worker-class eventlet klaverjas:app
