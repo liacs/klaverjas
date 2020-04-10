@@ -1,1 +1,1 @@
-web gunicorn klaverjas:app
+web gunicorn --workers=1 klaverjas:app
