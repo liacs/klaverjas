@@ -1,7 +1,6 @@
 "use strict";
 
-const socket = io(location.protocol + "//" +
-                  document.domain + ":" +
+const socket = io(location.protocol + "//" + document.domain + ":" +
                   location.port);
 
 socket.on("connect", function() {
@@ -33,7 +32,7 @@ socket.on("notify", function(data) {
     }
 
     for (let el of ["west", "north", "east", "south"]) {
-        let player = document.getElementById(el);
+        let player = document.getElementById("player-" + el);
         let avatar = document.createElement("img");
         avatar.src = data[el].avatar;
         avatar.className = "img-rounded";
@@ -81,13 +80,15 @@ socket.on("notify", function(data) {
 socket.on("ask_bid", function(data) {
     console.log("ask_bid", data);
     document.getElementById("trump-suit-chosen").className = "trump-suit suit-" + data.trump_suit;
-    document.getElementById("play").addEventListener("click", function() {
+    document.getElementById("play").addEventListener("click", function _play() {
         console.log("play");
+        this.removeEventListener("click", _play);
         $("#ask-bid").modal("hide");
         socket.emit("bid", {"game": game, "trump_suit": data.trump_suit});
     });
-    document.getElementById("pass").addEventListener("click", function() {
+    document.getElementById("pass").addEventListener("click", function _pass() {
         console.log("pass");
+        this.removeEventListener("click", _pass);
         $("#ask-bid").modal("hide");
         socket.emit("bid", {"game": game});
     });
@@ -100,8 +101,9 @@ socket.on("force_bid", function(data) {
     for (let i = 0; i < data.trump_suit.length; i++) {
         let el = document.createElement("button");
         el.className = "trump-suit suit-" + data.trump_suit[i]
-        el.addEventListener("click", function() {
+        el.addEventListener("click", function _choose() {
             console.log("play", data.trump_suit[i]);
+            this.removeEventListener("click", _choose);
             $("#force-bid").modal("hide");
             socket.emit("bid", {"game": game, "trump_suit": data.trump_suit[i]})
         });
@@ -124,8 +126,8 @@ socket.on("play", function(data) {
 });
 
 function suit_HTML(suit) {
-    return {"clubs": "&clubs;", "diamonds": "&diams;",
-            "hearts": "&hearts;", "spades": "&spades;"}[suit];
+    return {"clubs": "&clubs;&#xFE0E;", "diamonds": "&diams;&#xFE0E;",
+            "hearts": "&hearts;&#xFE0E;", "spades": "&spades;&#xFE0E;"}[suit];
 }
 
 function create_card(card, id, classes) {

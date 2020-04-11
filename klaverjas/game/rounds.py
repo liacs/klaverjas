@@ -90,7 +90,6 @@ class Round:
 
     def play_card(self, card):
         trick = self._tricks[-1]
-
         trick.add(card)
 
     def points(self):

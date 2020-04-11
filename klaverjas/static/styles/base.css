@@ -70,19 +70,19 @@
 }
 
 .suit-clubs:after {
-    content: "♣";
+    content: "♣\00FE0E";
 }
 
 .suit-diamonds:after {
-    content: "♦";
+    content: "♦\00FE0E";
 }
 
 .suit-hearts:after {
-    content: "♥";
+    content: "♥\00FE0E";
 }
 
 .suit-spades:after {
-    content: "♠";
+    content: "♠\00FE0E";
 }
 
 .card div[class*='suit']:after {
@@ -118,24 +118,24 @@
     transform-origin: left top;
 }
 
+#hand-east {
+    transform: rotate(270deg) translate(-388.75px, 551px);
+}
+
+#hand-north {
+    transform: rotate(180deg) translate(-482.5px, -132px);
+}
+
+#hand-west {
+    transform: rotate(90deg) translate(173.75px, -199px);
+}
+
 .hand .card {
     background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
     border: solid white 6px;
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
-}
-
-.hand.east {
-    transform: rotate(270deg) translate(-388.75px, 551px);
-}
-
-.hand.north {
-    transform: rotate(180deg) translate(-482.5px, -132px);
-}
-
-.hand.west {
-    transform: rotate(90deg) translate(173.75px, -199px);
 }
 
 .hand div:nth-child(1) {
@@ -194,7 +194,7 @@
     z-index: 7;
 }
 
-.table {
+#table {
     background-image: radial-gradient(ellipse, #00a651, darkgreen);
     border-radius: 20px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
@@ -208,22 +208,22 @@
     perspective: 9999px;
 }
 
-.trick-west {
+#trick-west {
     position: absolute;
     transform: rotate(85deg) translate(263.75px, -320px);
 }
 
-.trick-north {
+#trick-north {
     position: absolute;
     transform: rotate(187deg) translate(-438.5px, -207px);
 }
 
-.trick-east {
+#trick-east {
     position: absolute;
     transform: rotate(265deg) translate(-358.75px, 380px);
 }
 
-.trick-south {
+#trick-south {
     position: absolute;
     transform: rotate(7deg) translate(372.5px, 250px);
 }
@@ -303,22 +303,22 @@
     z-index: 8;
 }
 
-.player.east {
+#player-east {
     left: 635px;
     top: 241.25px;
 }
 
-.player.north {
+#player-north {
     left: 320px;
     top: 5px;
 }
 
-.player.south {
+#player-south {
     left: 320px;
     top: 477.5px;
 }
 
-.player.west {
+#player-west {
     left: 5px;
     top: 241.25px;
 }
@@ -344,10 +344,11 @@
 }
 
 .player .trump {
+    color: magenta;
     position: absolute;
     text-align: center;
-    font-size: 3em;
+    font-size: 3rem;
     width: 30px;
     left: 64px;
-    top: -15px;
+    top: 0px;
 }

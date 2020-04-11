@@ -1,78 +1,68 @@
 {% extends "base.html" %}
 
 {% block scripts %}
-    {{ super() }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='scripts/main.js') }}" type="module"></script>
-    <script type="text/javascript">
-        var game = "{{ game }}";
-    </script>
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+<script src="{{ url_for('static', filename='scripts/main.js') }}" type="module"></script>
+<script type="text/javascript">
+    var game = "{{ game }}";
+</script>
 {% endblock %}
 
 {% block styles %}
-    {{ super() }}
-    <link href="{{ url_for('static', filename='styles/base.css') }}" rel="stylesheet" />
+{{ super() }}
+<link href="{{ url_for('static', filename='styles/base.css') }}" rel="stylesheet" />
 {% endblock %}
 
 {% block app_content %}
 <div class="modal fade bd-example-modal-sm" id="ask-bid" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Bidding</h5>
-      </div>
-      <div class="modal-body">
-        <p><button id="trump-suit-chosen" class="trump-suit" disabled></button>&nbsp;&nbsp;was chosen as trump suit.<p>
-        <p>Do you want to play?</p>
-      </div>
-      <div class="modal-footer">
-        <button id="pass" type="button" class="btn btn-dark">Pass</button>
-        <button id="play" type="button" class="btn btn-dark">Play</button>
-      </div>
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bidding</h5>
+            </div>
+            <div class="modal-body">
+                <p><button id="trump-suit-chosen" class="trump-suit" disabled></button>&nbsp;&nbsp;was chosen as trump suit.<p>
+                <p>Do you want to play?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="pass" type="button" class="btn btn-dark">Pass</button>
+                <button id="play" type="button" class="btn btn-dark">Play</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade bd-example-modal-sm" id="force-bid" tabindex="-1" role="dialog" data-keyboard="false" data-backdrop="static">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Bidding</h5>
-      </div>
-      <div class="modal-body" id="force-bid-options">
-        <p>Choose the trump suit:</p>
-      </div>
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bidding</h5>
+            </div>
+            <div class="modal-body" id="force-bid-options">
+                <p>Choose the trump suit:</p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<div class="table" id="table">
+<div id="table">
 
-<div class="trick-west" id="trick-west"></div>
-<div class="trick-north" id="trick-north"></div>
-<div class="trick-east" id="trick-east"></div>
-<div class="trick-south" id="trick-south"></div>
+    <div id="trick-west"></div>
+    <div id="trick-north"></div>
+    <div id="trick-east"></div>
+    <div id="trick-south"></div>
 
-<div class="hand west" id="hand-west">
-</div>
+    <div class="hand" id="hand-west"></div>
+    <div class="player" id="player-west"></div>
 
-<div class="player west" id="west">
-</div>
+    <div class="hand" id="hand-north"></div>
+    <div class="player" id="player-north"></div>
 
-<div class="hand north" id="hand-north">
-</div>
+    <div class="hand" id="hand-east"></div>
+    <div class="player" id="player-east"></div>
 
-<div class="player north" id="north">
-</div>
-
-<div class="hand east" id="hand-east">
-</div>
-
-<div class="player east" id="east">
-</div>
-
-<div class="player south" id="south">
-</div>
+    <div class="player" id="player-south"></div>
 
 </div>
 {% endblock %}
