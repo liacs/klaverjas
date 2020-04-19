@@ -7,27 +7,27 @@ function suit_HTML(suit) {
 }
 
 function create_card(card, id, classes) {
-    let div = document.createElement("div");
+    let dom_card = document.createElement("div");
     if (id) {
-        div.id = id;
+        dom_card.id = id;
     }
-    div.className = "card";
+    dom_card.className = "card";
     if (classes) {
-        div.classList.add(classes);
+        dom_card.classList.add(classes);
     }
-    let face = document.createElement("div");
-    face.className = "face"
-    face.classList.add("suit-" + card.suit);
-    let rank = document.createElement("span");
-    rank.className = "rank";
-    rank.innerHTML = card.rank;
-    let suit = document.createElement("span");
-    suit.className = "suit";
-    suit.innerHTML = suit_HTML(card.suit);
-    face.appendChild(rank);
-    face.appendChild(suit);
-    div.appendChild(face);
-    return div;
+    let dom_face = document.createElement("div");
+    dom_face.className = "face"
+    dom_face.classList.add("suit-" + card.suit);
+    let dom_rank = document.createElement("span");
+    dom_rank.className = "rank";
+    dom_rank.innerHTML = card.rank;
+    let dom_suit = document.createElement("span");
+    dom_suit.className = "suit";
+    dom_suit.innerHTML = suit_HTML(card.suit);
+    dom_face.appendChild(dom_rank);
+    dom_face.appendChild(dom_suit);
+    dom_card.appendChild(dom_face);
+    return dom_card;
 }
 
 
@@ -67,6 +67,13 @@ const App = (function() {
             const dom_card = document.getElementById(item.suit + item.rank);
             dom_card.classList.add("movable");
             dom_card.addEventListener("click", function _play() {
+                data.legal_moves.forEach(function(item, index) {
+                    const dom_card = document.getElementById(item.suit + item.rank);
+                    dom_card.classList.remove("movable");
+                    dom_card.removeEventListener("click", _play);
+                    const dom_table = document.getElementById("table");
+                });
+                table.removeChild(dom_card);
                 socket.emit("play", {"game": game, "card": {"suit": item.suit,
                                                             "rank": item.rank}});
             });
@@ -118,7 +125,6 @@ const App = (function() {
             dom_options.appendChild(dom_trump);
         });
         $("#force-bid").modal("show");
-        render();
     };
 
     const event_init = function(data) {
@@ -144,6 +150,49 @@ const App = (function() {
         dom_trick.appendChild(dom_card);
         document.getElementById("player-" + players[data.player]).classList.remove("active");
         document.getElementById("player-" + players[data.to_play]).classList.add("active");
+    };
+
+    const event_score = function(data) {
+
+    };
+
+    const event_take_trick = function(data) {
+        for (const position of ["north", "east", "south", "west"]) {
+            const dom_trick = document.getElementById("trick-" + position);
+            dom_trick.removeChild(dom_trick.firstChild);
+        }
+    };
+
+    const event_trick = function(data) {
+        for (const position of ["north", "east", "west"]) {
+            const dom_hand = document.getElementById("hand-" + position);
+            dom_hand.innerHTML = "";
+            for (let i = 0; i < data[position]; ++i) {
+                const dom_card = document.createElement("div");
+                dom_card.className = "card";
+                dom_hand.appendChild(dom_card);
+            }
+        }
+
+        document.getElementById("player-" + players[data.to_play]).classList.add("active");
+
+        const dom_table = document.getElementById("table");
+        for (let i = 1; i <= 8; ++i) {
+            dom_table.querySelectorAll(".hand-" + i).forEach(function(item, index) {
+                dom_table.removeChild(item);
+            });
+        }
+
+        data.hand.forEach(function(item, index) {
+            let dom_card = create_card(item, item.suit + item.rank, "hand-" + (index + 1));
+            dom_table.appendChild(dom_card);
+        });
+
+        data.trick.forEach(function(item, index) {
+            const dom_card = create_card(item.card);
+            const dom_trick = document.getElementById("trick-" + players[item.player]);
+            dom_trick.appendChild(dom_card);
+        });
     };
 
     const render = function() {
@@ -181,6 +230,18 @@ const App = (function() {
                 case "play":
                     event_play(data);
                     window.setTimeout(render, 1000);
+                    break;
+                case "score":
+                    event_score(data);
+                    window.setTimeout(render, 1000);
+                    break;
+                case "take_trick":
+                    event_take_trick(data);
+                    window.setTimeout(render, 1000);
+                    break;
+                case "trick":
+                    event_trick(data);
+                    render();
                     break;
                 default:
                     console.debug(data);
@@ -271,5 +332,25 @@ socket.on("pass", function(data) {
 socket.on("play", function(data) {
     console.debug("play", data);
     data.event = "play";
+    App.update(data);
+});
+
+
+socket.on("score", function(data) {
+    console.debug("score", data);
+    data.event = "score";
+    App.update(data);
+});
+
+socket.on("take_trick", function(data) {
+    console.debug("take_trick", data);
+    data.event = "take_trick";
+    App.update(data);
+});
+
+
+socket.on("trick", function(data) {
+    console.debug("trick", data);
+    data.event = "trick";
     App.update(data);
 });

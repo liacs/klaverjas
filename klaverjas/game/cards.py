@@ -8,9 +8,6 @@ class Suit(Enum):
     CLUBS = 2
     DIAMONDS = 3
 
-    def __lt__(self, other):
-        return self.value < other.value
-
     def __str__(self):
         return ['spades', 'hearts', 'clubs', 'diamonds'][self.value]
 
@@ -25,9 +22,6 @@ class Rank(Enum):
     QUEEN = 5
     KING = 6
     ACE = 7
-
-    def __lt__(self, other):
-        return self.value < other.value
 
     def __str__(self):
         return ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'][self.value]
@@ -47,11 +41,6 @@ class Card:
 
     def __hash__(self):
         return hash(repr(self))
-
-    def __lt__(self, other):
-        if self._suit == other._suit:
-            return self._rank < other._rank
-        return self._suit < other._suit
 
     def __repr__(self):
         return '{}{}'.format(self._suit, self._rank)
