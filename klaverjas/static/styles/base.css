@@ -70,19 +70,19 @@
 }
 
 .suit-clubs:after {
-    content: "♣\00FE0E";
+    content: "♣\00fe0e";
 }
 
 .suit-diamonds:after {
-    content: "♦\00FE0E";
+    content: "♦\00fe0e";
 }
 
 .suit-hearts:after {
-    content: "♥\00FE0E";
+    content: "♥\00fe0e";
 }
 
 .suit-spades:after {
-    content: "♠\00FE0E";
+    content: "♠\00fe0e";
 }
 
 .card div[class*='suit']:after {

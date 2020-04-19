@@ -63,7 +63,7 @@ class User(UserMixin, db.Model):
             followers.c.followed_id == user.id).count() > 0
 
     def to_dict(self):
-        return {'name': str(self), 'avatar': self.avatar(60)}
+        return {'avatar': self.avatar(60), 'name': str(self)}
 
 
 @login.user_loader
@@ -111,113 +111,128 @@ class Game(db.Model):
                        sorted(deck[16:24]), sorted(deck[24:32])]
         self._trump_suit = random.choice(list(Suit))
         self._bids = 0
+        self.event_deal()
+        self.event_ask_bid()
 
     def dealer(self):
         if self._bids is not None:
             return self._players[len(self._rounds) % 4]
         return self._players[(len(self._rounds) - 1) % 4]
 
-    def event_bid(self, player, data):
-        if self._bids is None:
-            return
-        try:
-            lead = self._players.index(player)
-        except ValueError:
-            return
-        if player != self.to_play():
-            return
-        trump_suit = data.get('trump_suit')
-        if trump_suit is not None:
+    def event_ask_bid(self):
+        idx = self._players.index(self.to_play())
+        sid = self._sids[idx]
+        if sid is not None:
+            emit('ask_bid', {'trump_suit': str(self._trump_suit)}, room=sid)
+
+    def event_ask_play(self):
+        idx = self._players.index(self.to_play())
+        sid = self._sids[idx]
+        if sid is not None:
+            moves = self._rounds[-1].legal_moves(self._hands[idx])
+            emit('ask_play',
+                 {'legal_moves': [card.to_dict() for card in moves]},
+                 room=sid)
+
+    def event_bid(self, user, trump_suit):
+        if self._bids is not None and user == self.to_play():
+            lead = self._players.index(user)
             eldest = (self._players.index(self.dealer()) + 1) % 4
             self._bids = None
             self._trump_suit = suit_from_label(trump_suit)
             self._rounds.append(Round(lead, eldest, self._trump_suit))
-        else:
-            self._bids += 1
-        self.notify_all()
+            for idx, player in enumerate(self._players):
+                sid = self._sids[idx]
+                if sid is not None:
+                    emit('bid',
+                         {'player': str(user),
+                          'to_play': str(self.to_play()),
+                          'trump_suit': str(self._trump_suit)},
+                         room=sid)
+            self.event_ask_play()
 
-    def event_join(self, player, sid):
+    def event_deal(self):
+        for idx, player in enumerate(self._players):
+            sid = self._sids[idx]
+            if sid is not None:
+                emit('deal',
+                     {'hand': [card.to_dict() for card in self._hands[idx]],
+                      'dealer': str(self.dealer()),
+                      'to_play': str(self.to_play())},
+                     room=sid)
+
+    def event_force_bid(self):
+        idx = self._players.index(self.to_play())
+        sid = self._sids[idx]
+        if sid is not None:
+            emit('force_bid',
+                 {'trump_suits': [str(suit) for suit in Suit
+                                  if suit != self._trump_suit]},
+                 room=sid)
+
+    def event_join(self, user, sid):
         try:
-            idx = self._players.index(player)
+            idx = self._players.index(user)
         except ValueError:
             return
         self._sids[idx] = sid
-        self.notify(player)
-
-    def event_play(self, player, data):
+        emit('init',
+             {'north': self._players[(idx + 2) % 4].to_dict(),
+              'east': self._players[(idx + 3) % 4].to_dict(),
+              'south': user.to_dict(),
+              'west': self._players[(idx + 1) % 4].to_dict()},
+             room=sid)
+        self.event_deal()
         if self._bids is not None:
-            return
-        try:
-            idx = self._players.index(player)
-        except ValueError:
-            return
-        if player != self.to_play():
-            return
-        card = card_from_dict(data['card'])
-        round = self._rounds[-1]
-        moves = round.legal_moves(self._hands[idx])
-        if card not in moves:
-            return
-        self._hands[idx].remove(card)
-        round.play_card(card)
-        self.notify_all()
-        if round.complete_trick():
-            if round.is_complete():
-                self._scores[0] += round.points()[0] + round.meld()[0]
-                self._scores[1] += round.points()[1] + round.meld()[1]
-                if len(self._rounds) < 16:
-                    self.deal()
-            self.notify_all()
+            if self._bids < 4:
+                self.event_ask_bid()
+            else:
+                self.event_force_bid()
+        else:
+            self.event_ask_play()
+            # TODO: state
 
-    def notify(self, player):
-        idx = self._players.index(player)
-        lead = None
-        trick = []
-        if self._bids is None:
-            try:
-                round = self._rounds[-1]
-                lead = str(self._players[round.lead()])
-                current_trick = round.current_trick()
-                if current_trick is not None:
-                    for jdx, card in enumerate(current_trick.cards()):
-                        play = (current_trick.lead() + jdx) % 4
-                        trick.append({'card': card.to_dict(),
-                                      'player': str(self._players[play])})
-            except IndexError:
-                pass
-        state = {'north': {**self._players[(idx + 2) % 4].to_dict(),
-                           'card_count': len(self._hands[(idx + 2) % 4])},
-                 'east':  {**self._players[(idx + 3) % 4].to_dict(),
-                           'card_count': len(self._hands[(idx + 3) % 4])},
-                 'west':  {**self._players[(idx + 1) % 4].to_dict(),
-                           'card_count': len(self._hands[(idx + 1) % 4])},
-                 'south': self._players[idx].to_dict(),
-                 'dealer': str(self.dealer()),
-                 'lead': lead,
-                 'round': len(self._rounds),
-                 'scores': self._scores,
-                 'trick': trick,
-                 'hand': [card.to_dict() for card in self._hands[idx]],
-                 'trump_suit': str(self._trump_suit)}
-        sid = self._sids[idx]
-        if sid is not None:
-            emit('notify', state, room=sid)
-            if player == self.to_play():
-                if self._bids is None:
-                    moves = self._rounds[-1].legal_moves(self._hands[idx])
-                    state = {'legal_moves': [card.to_dict() for card in moves]}
-                    emit('play', state, room=sid)
-                elif self._bids < 4:
-                    state = {'trump_suit': str(self._trump_suit)}
-                    emit('ask_bid', state, room=sid)
-                else:
-                    state = {'trump_suit': [str(suit) for suit in Suit
-                                            if suit != self._trump_suit]}
-                    emit('force_bid', state, room=sid)
+    def event_pass(self, user):
+        if (self._bids is not None and self._bids < 4 and
+                user == self.to_play()):
+            self._bids += 1
+            for idx, player in enumerate(self._players):
+                sid = self._sids[idx]
+                if sid is not None:
+                    emit('pass',
+                         {'player': str(user),
+                          'to_play': str(self.to_play())},
+                         room=sid)
+            if self._bids == 4:
+                self.event_force_bid()
+            self.event_ask_bid()
 
-    def notify_all(self):
-        for player in self._players:
-            self.notify(player)
+    def event_play(self, user, card_dict):
+        if self._bids is None and user == self.to_play():
+            idx = self._players.index(user)
+            round = self._rounds[-1]
+            moves = round.legal_moves(self._hands[idx])
+            card = card_from_dict(card_dict)
+            if card not in moves:
+                return
+            self._hands[idx].remove(card)
+            round.play_card(card)
+            for idx, player in enumerate(self._players):
+                sid = self._sids[idx]
+                if sid is not None:
+                    emit('play',
+                         {'player': str(user),
+                          'to_play': str(self.to_play()),
+                          'card': card.to_dict()},
+                         room=sid)
+            if round.complete_trick():
+                self.event_take_trick()
+                if round.is_complete():
+                    self._scores[0] += round.points()[0] + round.meld()[0]
+                    self._scores[1] += round.points()[1] + round.meld()[1]
+                    self.event_show_score()
+                    if len(self._rounds) < 16:
+                        self.deal()
 
     def to_play(self):
         if self._bids is not None:

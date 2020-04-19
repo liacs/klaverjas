@@ -126,8 +126,8 @@ socket.on("play", function(data) {
 });
 
 function suit_HTML(suit) {
-    return {"clubs": "&clubs;&#xFE0E;", "diamonds": "&diams;&#xFE0E;",
-            "hearts": "&hearts;&#xFE0E;", "spades": "&spades;&#xFE0E;"}[suit];
+    return {"clubs": "&clubs;&#xfe0e;", "diamonds": "&diams;&#xfe0e;",
+            "hearts": "&hearts;&#xfe0e;", "spades": "&spades;&#xfe0e;"}[suit];
 }
 
 function create_card(card, id, classes) {

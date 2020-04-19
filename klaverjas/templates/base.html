@@ -1,5 +1,9 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block metas %}
+<meta charset="utf-8" />
+{% endblock %}
+
 {% block title %}
 Klaverjas
 {% endblock %}
@@ -14,7 +18,7 @@ Klaverjas
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('index') }}" style="font-size: 3em;">&clubs;</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}" style="font-size: 3em;">&clubs;&#xfe0e;</a>
         </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">

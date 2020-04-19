@@ -34,7 +34,7 @@ def disconnect():
 
 @socketio.on('join')
 @authenticated_only
-def join(data):
+def event_join(data):
     game_id = data.get('game')
     game = games.get(game_id)
     if game is None:
@@ -50,12 +50,22 @@ def join(data):
 
 @socketio.on('bid')
 @authenticated_only
-def bid(data):
+def event_bid(data):
     game_id = data.get('game')
     game = games.get(game_id)
     if game is None:
         app.logger.error('unknown game {}'.format(game_id))
-    game.event_bid(current_user, data)
+    game.event_bid(current_user, data.get('trump_suit'))
+
+
+@socketio.on('pass')
+@authenticated_only
+def event_pass(data):
+    game_id = data.get('game')
+    game = games.get(game_id)
+    if game is None:
+        app.logger.error('unknown game {}'.format(game_id))
+    game.event_pass(current_user)
 
 
 @socketio.on('play')
@@ -65,4 +75,4 @@ def play(data):
     game = games.get(game_id)
     if game is None:
         app.logger.error('unknown game {}'.format(game_id))
-    game.event_play(current_user, data)
+    game.event_play(current_user, data.get('card'))
