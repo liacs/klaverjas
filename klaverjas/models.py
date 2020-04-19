@@ -175,8 +175,9 @@ class Game(db.Model):
                 if round.is_complete():
                     self._scores[0] += round.points()[0] + round.meld()[0]
                     self._scores[1] += round.points()[1] + round.meld()[1]
-                    self.notify_all(self.notify_score, {'scores': round.points(),
-                                                        'meld': round.meld()})
+                    self.notify_all(self.notify_score,
+                                    {'scores': round.points(),
+                                     'meld': round.meld()})
                     if len(self._rounds) < 16:
                         self.deal()
                         return

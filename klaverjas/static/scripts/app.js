@@ -213,7 +213,7 @@ const App = (function() {
                     break;
                 case "deal":
                     event_deal(data);
-                    window.setTimeout(render, 1000);
+                    window.setTimeout(render, 250);
                     break;
                 case "force_bid":
                     event_force_bid(data);
@@ -229,15 +229,20 @@ const App = (function() {
                     break;
                 case "play":
                     event_play(data);
-                    window.setTimeout(render, 1000);
+                    window.setTimeout(render, 500);
                     break;
                 case "score":
                     event_score(data);
                     window.setTimeout(render, 1000);
                     break;
                 case "take_trick":
-                    event_take_trick(data);
+                    data.event = "take_trick2";
+                    update(data)
                     window.setTimeout(render, 1000);
+                    break;
+                case "take_trick2":
+                    event_take_trick(data);
+                    render();
                     break;
                 case "trick":
                     event_trick(data);
@@ -258,7 +263,6 @@ const App = (function() {
 
     return {
         init: init,
-        render: render,
         update: update
     }
 })();
