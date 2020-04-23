@@ -12,7 +12,6 @@ def other_team(player):
 class Round:
     def __init__(self, lead, eldest, trump_suit):
         self._lead = lead
-        self._eldest = eldest
         self._trump_suit = trump_suit
         self._tricks = [Trick(eldest)]
         self._points = [0, 0]

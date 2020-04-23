@@ -7,9 +7,6 @@ class Trick:
         self._cards = []
         self._lead = lead
 
-    def __str__(self):
-        return '  '.join(str(card) for card in self._cards)
-
     def add(self, card):
         self._cards.append(card)
 
