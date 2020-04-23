@@ -9,6 +9,7 @@ setup(
     python_requires='>=3.6',
     zip_safe=False,
     install_requires=[
+        'email-validator',
         'eventlet',
         'Flask-Bootstrap',
         'Flask-Login',

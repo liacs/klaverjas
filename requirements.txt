@@ -1,3 +1,4 @@
+email-validator
 eventlet
 Flask-Bootstrap
 Flask-Login
