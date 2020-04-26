@@ -15,8 +15,6 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-
-    transition: transform 0.5s;
     transform-style: preserve-3d;
 }
 

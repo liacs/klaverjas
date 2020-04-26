@@ -1,49 +1,48 @@
-"use strict";
+import {Card} from "./cards.js";
 
 
-import {Cards} from "./cards.js";
+class Hand {
+    constructor(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.cards = [];
+    }
 
-
-let Hands = {};
-
-
-(function() {
-    Hands.create = function(x, y, rot) {
-        return {
-            x: x,
-            y: y,
-            rot: rot,
-            cards: []
-        };
-    };
-
-    Hands.add = function(hand, card, delay) {
-        if (hand.cards.length < 8) {
-            hand.cards.push(card);
-            Hands.animate_fan(hand, delay, 500);
+    add(card) {
+        if (this.cards.length < 8) {
+            this.cards.push(card);
         }
-    };
+    }
 
-    Hands.animate_fan = function(hand, delay, duration, arc=70.0, spread=150.0) {
+    remove(idx) {
+        if (this.cards.length > idx) {
+            console.log(this.cards.length);
+            const card = this.cards[idx];
+            this.cards.splice(idx, 1);
+            return card;
+        }
+    }
+
+    animate_fan(delay, duration, arc=30, spread=400) {
         function deg2rad(degrees) {
-            return degrees * Math.PI / 180.0;
+            return degrees * Math.PI / 180;
         }
 
-        const step = arc / 9.0;
-        const offset = Math.floor((8 - hand.cards.length) / 2) + 1;
+        const step = arc / 9;
+        const offset = Math.floor((8 - this.cards.length) / 2) + 1;
 
-        for (let i = 0; i < hand.cards.length; i++) {
-            const angle = step * (i + offset) - arc / 2.0;
+        for (let i = 0; i < this.cards.length; i++) {
+            const angle = step * (i + offset) - arc / 2;
+            const x = Math.cos(deg2rad(angle - 90 + this.angle)) * spread + spread + this.x;
+            const y = Math.sin(deg2rad(angle - 90 + this.angle)) * spread + spread + this.y;
 
-            let x = Math.cos(deg2rad(angle - 90.0 + hand.rot)) * spread + spread + hand.x;
-            let y = Math.sin(deg2rad(angle - 90.0 + hand.rot)) * spread + spread + hand.y;
-
-            Cards.animate_to(hand.cards[i], delay, duration, x, y, angle + hand.rot);
+            this.cards[i].animate_to(delay, duration, x, y, angle + this.angle);
         }
-    };
-})();
+    }
+}
 
 
 export {
-    Hands
+    Hand
 }

@@ -1,11 +1,4 @@
-"use strict";
-
-
-import {DOM} from "./DOM.js";
 import {Animations} from "./animations.js";
-
-
-let Cards = {};
 
 
 const RANKS = {
@@ -75,73 +68,73 @@ const SUITS = {
 };
 
 
-(function() {
-    Cards.create = function(hidden, suit, rank, flipped) {
-        let $el = DOM.create_element("div", "card");
-        let $back = DOM.create_element("div", "back");
+class Card {
+    constructor($parent, hidden, suit, rank) {
+        this.flipped = hidden;
+        this.rank = rank;
+        this.suit = suit;
+        this.x = 0;
+        this.y = 0;
+        this.angle = 0;
+        this.$el = document.createElement("div");
+
+        this.$el.className = "card";
+        const $back = document.createElement("div");
+        $back.className = "back";
         if (!hidden) {
-            let $face = DOM.create_element("div", "face suit-" + suit.label);
-            let $rank = DOM.create_element("span", "rank");
-            let $suit = DOM.create_element("span", "suit");
+            const $face = document.createElement("div");
+            const $rank = document.createElement("span");
+            const $suit = document.createElement("span");
+
+            $face.className = "face suit-" + suit.label;
+            $rank.className = "rank";
+            $suit.className = "suit";
 
             $rank.innerHTML = rank.html;
             $suit.innerHTML = suit.html;
 
             $face.appendChild($rank);
             $face.appendChild($suit);
-            $el.appendChild($face);
+            this.$el.appendChild($face);
+        } else {
+            this.$el.style.transform = "rotateY(180deg)";
         }
+        this.$el.appendChild($back);
+        //this.$el.style.visibility = "hidden";
+        $parent.appendChild(this.$el);
+    }
 
-        $el.appendChild($back);
+    animate_to(delay, duration, x, y, angle) {
+        const start_x = this.x;
+        const start_y = this.y;
+        const start_angle = this.angle;
+        const d_x = x - this.x;
+        const d_y = y - this.y;
+        const d_angle = angle - this.angle;
+        const card = this;
 
-        if (flipped || hidden) {
-            $el.style.transform = "rotateY(180deg)";
-            flipped = true;
-        }
+        Animations.create(duration,
+            function(d_t) {
+                card.x = d_x * d_t + start_x;
+                card.y = d_y * d_t + start_y;
+                card.angle = d_angle * d_t + start_angle;
+                card.$el.style.transform = "translate(" + card.x + "px, " + card.y + "px) rotate(" + card.angle + "deg)" + (card.flipped ? " rotateY(180deg)" : "");
+            }, {effect: Animations.effects.ease, delay: delay});
+    }
 
-        return {
-            suit: suit,
-            rank: rank,
-            $el: $el,
-            flipped: flipped,
-            x: 0.0,
-            y: 0.0,
-            rot: 0.0
-        };
-    };
-
-    Cards.animate_to = function(card, delay, duration, x, y, rot) {
-        const start_x = card.x;
-        const start_y = card.y;
-        const start_rot = card.rot;
-
-        Animations.create(delay, duration,
-            function(dt) {
-                const dx = x - start_x;
-                const dy = y - start_y;
-                const drot = rot - start_rot;
-
-                card.x = dx * dt + start_x;
-                card.y = dy * dt + start_y;
-                card.rot = drot * dt + start_rot;
-
-                card.$el.style.transform = "translate(" + card.x + "px, " + card.y + "px) rotate(" + card.rot + "deg)" + (card.flipped ? " rotateY(180deg)" : "");
-            }, Animations.ease);
-    };
-
-    Cards.animate_flip = function(card, delay, duration) {
-        Animations.create(delay, duration,
-            function(dt) {
-                const rot = card.flipped ? 180.0 - 180.0 * dt : 180.0 * dt;
-
-                card.$el.style.transform = "translate(" + card.x + "px, " + card.y + "px) rotate(" + card.rot + "deg)" + (card.flipped ? " rotateY(" + rot + "deg)" : "");
-            }, Animations.ease, null, function() { card.flipped = !card.flipped; });
-    };
-})();
+    animate_flip(delay, duration) {
+        const card = this;
+        Animations.create(duration,
+            function(d_t) {
+                const angle = card.flipped ? 180 - 180 * d_t : 180 * d_t;
+                card.$el.style.transform = "translate(" + card.x + "px, " + card.y + "px) rotate(" + card.angle + "deg)" + (card.flipped ? " rotateY(" + rot + "deg)" : "");
+            }, {effect: Animations.effects.ease, on_end: function() { card.flipped = !card.flipped; }, delay: delay});
+    }
+}
 
 
 export {
-    Cards,
+    Card,
     RANKS,
     SUITS
 }

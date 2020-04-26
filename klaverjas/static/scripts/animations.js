@@ -1,38 +1,40 @@
-"use strict";
-
-
-let Animations = {};
+const Animations = {};
 
 
 (function() {
-    let animations = [];
-    let ticking = false;
+    let active = false;
+    const animations = [];
 
-    let tick = function() {
-        const now = Date.now();
-
+    const tick = function() {
         if (!animations.length) {
-            ticking = false;
+            active = false;
             return;
         }
 
+        const now = performance.now();
+
         for (let i = 0; i < animations.length; i++) {
-            let animation = animations[i];
+            const animation = animations[i];
+
             if (now < animation.start) {
                 continue;
             }
 
-            if (!animation.started) {
-                animation.started = true;
-                animation.on_start && animation.on_start();
+            if (!animation.active) {
+                animation.active = true;
+                if (animation.on_start) {
+                    animation.on_start();
+                }
             }
 
-            const delta = Math.min((now - animation.start) / (animation.end - animation.start), 1.0);
-            animation.on_progress && animation.on_progress(animation.effect(delta));
+            const delta = (now - animation.start) / animation.duration;
+            animation.on_progress(animation.effect(Math.min(delta, 1)));
 
             if (now > animation.end) {
-                animation.on_end && animation.on_end();
                 animations.splice(i--, 1);
+                if (animation.on_end) {
+                    animation.on_end();
+                }
             }
         }
 
@@ -40,29 +42,33 @@ let Animations = {};
     };
 
 
-    Animations.linear = function(t) {
-        return t;
+    Animations.effects = {
+        ease: function(t) {
+            return t < 0.5 ? 4 * t * t * t :
+                             (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+        },
+
+        linear: function(t) {
+            return t;
+        }
     };
 
-    Animations.ease = function(t) {
-        return t < 0.5 ? 4.0 * t * t * t : (t - 1.0) * (2.0 * t - 2.0) * (2.0 * t - 2.0) + 1.0;
-    };
-
-    Animations.create = function(delay, duration, on_progress, effect, on_start, on_end) {
-        const now = Date.now();
-        let start = now + delay;
+    Animations.create = function(duration, on_progress, params) {
+        const now = performance.now();
+        const start = now + (params.delay || 0);
 
         animations.push({
             start: start,
             end: start + duration,
-            effect: effect || Animations.linear,
-            on_start: on_start,
+            duration: duration,
+            on_start: params.on_start,
             on_progress: on_progress,
-            on_end: on_end
+            on_end: params.on_end,
+            effect: params.effect || Animations.effects.linear
         });
 
-        if (!ticking) {
-            ticking = true;
+        if (!active) {
+            active = true;
             window.requestAnimationFrame(tick);
         }
     };
